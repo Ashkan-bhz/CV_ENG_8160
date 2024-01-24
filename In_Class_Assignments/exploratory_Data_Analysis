@@ -1,0 +1,37 @@
+import pandas as pd
+import random
+import numpy as np
+import matplotlib.pyplot as plt
+
+class dataproc:
+  """A simple class for ranking detectors by speed and occupancy"""
+  def __init__(self,path):
+    self.path = path
+    self.n = 1
+    self.days = [2,3]
+
+  def read_csv_format(self):
+    df = pd.read_csv(self.path)
+    df['datetime'] = pd.to_datetime(df['datetime'])
+
+    return df
+
+  def pick_random(self):
+    # df is dataframe
+    # n is the number of detectors to filter
+    df = self.read_csv_format()
+    unique_detectors = df['detector_id'].unique()
+    select_detectors = random.sample(unique_detectors.tolist(),self.n)
+    df_filter = df[df['detector_id'].isin(select_detectors)]
+    return df_filter
+
+
+  def visualize(self, df):
+    return df['occupancy'].plot.hist(), df.plot(x='datetime',y='occupancy')
+
+  def split_data(self,df):
+    df['day'] = df['datetime'].dt.day
+    df['hour']= df['datetime'].dt.hour
+    df = df[(df['hour']>=6) & (df['hour']<=20) ]
+    return df[df['day']==self.days[0]],df[df['day']==self.days[1]]
+
